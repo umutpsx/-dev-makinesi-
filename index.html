@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <title>ÖdevMakinesi</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-blue-50 font-sans">
+  <header class="bg-blue-600 text-white p-4 text-center shadow-md">
+    <h1 class="text-2xl font-bold">📘 ÖdevMakinesi</h1>
+    <p class="text-sm">Yapay zekâ destekli ödev yardımcınız</p>
+  </header>
+
+  <main class="p-6 text-center">
+    <div id="kayitPaneli" class="mb-6">
+      <h3 class="text-xl font-semibold">📝 Kayıt Ol</h3>
+      <input type="text" id="yeniKullanici" placeholder="Yeni Kullanıcı Adı" class="w-full max-w-md p-2 border rounded mb-2" />
+      <input type="password" id="yeniSifre" placeholder="Yeni Şifre" class="w-full max-w-md p-2 border rounded mb-2" />
+      <button onclick="kayitOl()" class="bg-blue-600 text-white px-4 py-2 rounded">Kayıt Ol</button>
+    </div>
+
+    <div id="girisPaneli" class="mb-6">
+      <h3 class="text-xl font-semibold">👤 Giriş Yap</h3>
+      <input type="text" id="kullaniciAdi" placeholder="Kullanıcı Adı" class="w-full max-w-md p-2 border rounded mb-2" />
+      <input type="password" id="sifre" placeholder="Şifre" class="w-full max-w-md p-2 border rounded mb-2" />
+      <button onclick="girisYap()" class="bg-green-600 text-white px-4 py-2 rounded">Giriş Yap</button>
+    </div>
+
+    <div id="icerik" style="display:none">
+      <p id="hosgeldin" class="font-bold text-lg mb-4 text-blue-700"></p>
+
+      <h3 class="text-lg">📌 Konunu Yaz:</h3>
+      <input type="text" id="konu" placeholder="Örnek: Kurtuluş Savaşı" class="w-full max-w-md p-2 border rounded mb-4" />
+      <button onclick="goster()" class="bg-purple-600 text-white px-4 py-2 rounded">➕ Ödev Oluştur</button>
+
+      <h3 class="mt-6 text-lg">📄 Ödev:</h3>
+      <textarea id="cevap" rows="10" placeholder="Burada sonuç görünecek..." class="w-full max-w-2xl p-3 mt-2 border rounded bg-white shadow"></textarea><br />
+      <button onclick="indirPDF()" class="bg-gray-800 text-white mt-4 px-4 py-2 rounded">📥 PDF İndir</button>
+
+      <div id="reklam" class="bg-yellow-100 border border-yellow-300 p-4 mt-6 max-w-xl mx-auto">
+        <p><strong>Reklam:</strong> ChatGPT ile ödevlerini daha da kolaylaştır! <a href="https://chat.openai.com/" target="_blank" class="text-blue-700 underline">Tıkla</a></p>
+      </div>
+    </div>
+  </main>
+
+  <footer class="bg-gray-100 text-center py-4 text-sm text-gray-600">
+    &copy; 2025 ÖdevMakinesi | Tüm hakları saklıdır.
+  </footer>
+
+  <script>
+    let kullanicilar = JSON.parse(localStorage.getItem("kullanicilar")) || { umut: "1234" };
+    let aktifKullanici = null;
+
+    function kayitOl() {
+      const yeniAd = document.getElementById("yeniKullanici").value.trim();
+      const yeniSifre = document.getElementById("yeniSifre").value.trim();
+      if (yeniAd && yeniSifre) {
+        if (kullanicilar[yeniAd]) {
+          alert("Bu kullanıcı adı zaten var.");
+        } else {
+          kullanicilar[yeniAd] = yeniSifre;
+          localStorage.setItem("kullanicilar", JSON.stringify(kullanicilar));
+          alert("Kayıt başarılı! Giriş yapabilirsiniz.");
+        }
+      } else {
+        alert("Lütfen tüm alanları doldurun.");
+      }
+    }
+
+    function girisYap() {
+      const ad = document.getElementById("kullaniciAdi").value.trim();
+      const sifre = document.getElementById("sifre").value.trim();
+      if (kullanicilar[ad] && kullanicilar[ad] === sifre) {
+        aktifKullanici = ad;
+        document.getElementById("kayitPaneli").style.display = "none";
+        document.getElementById("girisPaneli").style.display = "none";
+        document.getElementById("icerik").style.display = "block";
+        document.getElementById("hosgeldin").innerText = `👋 Hoş geldin, ${aktifKullanici}!`;
+        yukleGecmis();
+      } else {
+        alert("Hatalı kullanıcı adı veya şifre");
+      }
+    }
+
+    function goster() {
+      const konu = document.getElementById("konu").value.trim().toLowerCase();
+      const cevap = document.getElementById("cevap");
+      if (konu === "") {
+        cevap.value = "Lütfen bir konu gir.";
+        return;
+      }
+      let sonuc = "";
+      if (konu.includes("tarih") || konu.includes("savaş") || konu.includes("atatürk")) {
+        sonuc = `${konu} konusu, Türk tarihinin dönüm noktalarından biridir. Bu dönemde yaşanan olaylar, milletin bağımsızlık mücadelesi ve modernleşme sürecini etkiler.`;
+      } else if (konu.includes("fen") || konu.includes("fizik") || konu.includes("biyoloji") || konu.includes("kimya")) {
+        sonuc = `${konu}, doğayı ve canlıları anlamamıza yardımcı olan bilim dallarındandır. Bu konular bilimsel araştırmalara dayalıdır.`;
+      } else if (konu.includes("çevre") || konu.includes("doğa") || konu.includes("iklim")) {
+        sonuc = `${konu}, günümüzde en önemli problemlerden biridir. Doğayı korumak için çevre bilinci oluşturmak gereklidir.`;
+      } else {
+        sonuc = `${konu} hakkında genel bir ödev:\n${konu}, toplumda sıkça karşılaşılan ve tartışılan bir konudur. Bu konuda araştırmalar yapılmalı ve çeşitli kaynaklardan bilgi toplanmalıdır.`;
+      }
+      cevap.value = sonuc;
+      kaydetGecmis(konu, sonuc);
+    }
+
+    function kaydetGecmis(konu, sonuc) {
+      if (!aktifKullanici) return;
+      const kayitlar = JSON.parse(localStorage.getItem("gecmis_" + aktifKullanici)) || [];
+      kayitlar.push({ konu, sonuc });
+      localStorage.setItem("gecmis_" + aktifKullanici, JSON.stringify(kayitlar));
+    }
+
+    function yukleGecmis() {
+      const kayitlar = JSON.parse(localStorage.getItem("gecmis_" + aktifKullanici)) || [];
+      if (kayitlar.length > 0) {
+        alert(`📚 Daha önce oluşturduğun ${kayitlar.length} ödev var!`);
+      }
+    }
+
+    function indirPDF() {
+      const metin = document.getElementById("cevap").value;
+      if (!metin) {
+        alert("Önce ödevi oluşturmalısınız!");
+        return;
+      }
+      const blob = new Blob([metin], { type: "application/pdf" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "odev.pdf";
+      link.click();
+    }
+  </script>
+</body>
+</html>
